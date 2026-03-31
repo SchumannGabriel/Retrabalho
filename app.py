@@ -3,7 +3,8 @@ import smartsheet
 import pandas as pd
 import re
 
-# --- 1. CONFIGURAÇÕES E CUSTOS ATUALIZADOS ---
+# --- 1. CONFIGURAÇÕES E CREDENCIAIS ---
+# Puxando do Streamlit Cloud Secrets
 SHEET_ID = st.secrets["smartsheet"]["sheet_id"]
 SMARTSHEET_ACCESS_TOKEN = st.secrets["smartsheet"]["access_token"]
 
@@ -25,27 +26,37 @@ custo_setor_map = {
 @st.cache_data(ttl=300)
 def buscar_tempos_unicos():
     try:
-        smart = smartsheet.Smartsheet(TOKEN)
+        # CORREÇÃO: Usando a variável correta SMARTSHEET_ACCESS_TOKEN
+        smart = smartsheet.Smartsheet(SMARTSHEET_ACCESS_TOKEN)
         sheet = smart.Sheets.get_sheet(SHEET_ID)
+        
         columns = [col.title for col in sheet.columns]
         rows = [[cell.value for cell in row.cells] for row in sheet.rows]
         df = pd.DataFrame(rows, columns=columns)
         
-        # Filtra apenas Retrabalho
-        df = df[df['Tratativa'].astype(str).str.contains('Retrabalho', case=False, na=False)].copy()
+        # Filtra apenas linhas que contenham 'Retrabalho' na coluna Tratativa
+        if 'Tratativa' in df.columns:
+            df = df[df['Tratativa'].astype(str).str.contains('Retrabalho', case=False, na=False)].copy()
         
-        # Limpa o tempo (ex: "40 min" -> 40)
+        # Função para limpar o tempo (ex: "40 min" -> 40)
         def limpar_tempo(v):
             if v is None: return 0
             num = re.findall(r'\d+', str(v))
             return int(num[0]) if num else 0
 
-        df['Tempo_Min'] = df['Tempo de retrabalho'].apply(limpar_tempo)
+        if 'Tempo de retrabalho' in df.columns:
+            df['Tempo_Min'] = df['Tempo de retrabalho'].apply(limpar_tempo)
+        else:
+            df['Tempo_Min'] = 0
         
-        # Retorna apenas Setor e Tempo (Removendo duplicados)
-        return df[['Setor que retrabalhou', 'Tempo_Min']].drop_duplicates()
+        # Retorna apenas Setor e Tempo (Removendo duplicados para a tabela de consulta)
+        if 'Setor que retrabalhou' in df.columns:
+            return df[['Setor que retrabalhou', 'Tempo_Min']].drop_duplicates()
+        else:
+            return pd.DataFrame(columns=['Setor que retrabalhou', 'Tempo_Min'])
+            
     except Exception as e:
-        st.error(f"Erro ao carregar dados: {e}")
+        st.error(f"Erro ao carregar dados do Smartsheet: {e}")
         return pd.DataFrame()
 
 # --- 2. INTERFACE ---
@@ -58,28 +69,33 @@ df_base = buscar_tempos_unicos()
 setor_sel = st.selectbox("Selecione o Setor:", sorted(list(custo_setor_map.keys())))
 custo_h = custo_setor_map[setor_sel]
 
-# Filtra tempos únicos do setor
-df_exibir = df_base[df_base['Setor que retrabalhou'] == setor_sel].copy()
+# Filtra tempos únicos do setor selecionado
+if not df_base.empty and 'Setor que retrabalhou' in df_base.columns:
+    df_exibir = df_base[df_base['Setor que retrabalhou'] == setor_sel].copy()
+else:
+    df_exibir = pd.DataFrame()
 
 if not df_exibir.empty:
-    # Cálculo do Custo
+    # Cálculo do Custo baseado no valor/hora do dicionário
     df_exibir['Custo'] = (df_exibir['Tempo_Min'] * custo_h) / 60
     
-    # Formatação Final
+    # Formatação para exibição
     df_exibir = df_exibir.rename(columns={'Tempo_Min': 'Tempo (min)'})
     df_exibir['Custo'] = df_exibir['Custo'].apply(lambda x: f"R$ {x:.2f}")
     
-    # Exibe apenas Tempo e Custo
+    # EXIBIÇÃO DA TABELA: Ordenada por tempo e SEM o número da linha (index)
     st.table(df_exibir[['Tempo (min)', 'Custo']].sort_values(by='Tempo (min)'))
 else:
-    st.info(f"Nenhum tempo histórico registrado para o setor {setor_sel} no Smartsheet.")
+    st.info(f"Nenhum tempo histórico registrado para o setor '{setor_sel}' no Smartsheet.")
 
-# --- 3. CALCULADORA RÁPIDA ---
+# --- 3. CALCULADORA ---
 st.divider()
 st.subheader("Calculadora Manual")
+st.write(f"Custo atual do setor {setor_sel}: **R$ {custo_h:.2f}/hora**")
+
 c1, c2 = st.columns(2)
 with c1:
-    t_manual = st.number_input("Digite o tempo (min):", min_value=0, step=1)
+    t_manual = st.number_input("Digite o tempo (min):", min_value=0, step=1, value=0)
 with c2:
     total_c = (t_manual * custo_h) / 60
-    st.metric(f"Custo para {setor_sel}", f"R$ {total_c:.2f}")
+    st.metric(f"Preço Calculado", f"R$ {total_c:.2f}")
