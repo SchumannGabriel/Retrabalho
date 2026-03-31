@@ -26,7 +26,7 @@ custo_setor_map = {
 @st.cache_data(ttl=300)
 def buscar_tempos_unicos():
     try:
-        # CORREÇÃO: Usando a variável correta SMARTSHEET_ACCESS_TOKEN
+        # Conexão com Smartsheet usando o token correto
         smart = smartsheet.Smartsheet(SMARTSHEET_ACCESS_TOKEN)
         sheet = smart.Sheets.get_sheet(SHEET_ID)
         
@@ -49,7 +49,7 @@ def buscar_tempos_unicos():
         else:
             df['Tempo_Min'] = 0
         
-        # Retorna apenas Setor e Tempo (Removendo duplicados para a tabela de consulta)
+        # Retorna apenas Setor e Tempo (Removendo duplicados)
         if 'Setor que retrabalhou' in df.columns:
             return df[['Setor que retrabalhou', 'Tempo_Min']].drop_duplicates()
         else:
@@ -60,7 +60,7 @@ def buscar_tempos_unicos():
         return pd.DataFrame()
 
 # --- 2. INTERFACE ---
-st.set_page_config(page_title="Tabela de Preços de Retrabalho", layout="centered")
+st.set_page_config(page_title="Preços de Retrabalho", layout="centered")
 st.title("Tabela de Tempos e Custos")
 
 df_base = buscar_tempos_unicos()
@@ -76,26 +76,30 @@ else:
     df_exibir = pd.DataFrame()
 
 if not df_exibir.empty:
-    # Cálculo do Custo baseado no valor/hora do dicionário
+    # Cálculo do Custo baseado no valor/hora
     df_exibir['Custo'] = (df_exibir['Tempo_Min'] * custo_h) / 60
     
     # Formatação para exibição
     df_exibir = df_exibir.rename(columns={'Tempo_Min': 'Tempo (min)'})
     df_exibir['Custo'] = df_exibir['Custo'].apply(lambda x: f"R$ {x:.2f}")
     
-    # EXIBIÇÃO DA TABELA: Ordenada por tempo e SEM o número da linha (index)
-    st.table(df_exibir[['Tempo (min)', 'Custo']].sort_values(by='Tempo (min)'))
+    # EXIBIÇÃO DA TABELA: Ordenada, sem índice lateral e ocupando a largura total
+    st.dataframe(
+        df_exibir[['Tempo (min)', 'Custo']].sort_values(by='Tempo (min)'), 
+        hide_index=True, 
+        use_container_width=True
+    )
 else:
     st.info(f"Nenhum tempo histórico registrado para o setor '{setor_sel}' no Smartsheet.")
 
-# --- 3. CALCULADORA ---
+# --- 3. CALCULADORA MANUAL ---
 st.divider()
-st.subheader("Calculadora Manual")
+st.subheader("Calculadora Rápida")
 st.write(f"Custo atual do setor {setor_sel}: **R$ {custo_h:.2f}/hora**")
 
 c1, c2 = st.columns(2)
 with c1:
-    t_manual = st.number_input("Digite o tempo (min):", min_value=0, step=1, value=0)
+    t_manual = st.number_input("Digite o tempo manual (min):", min_value=0, step=1, value=0)
 with c2:
     total_c = (t_manual * custo_h) / 60
     st.metric(f"Preço Calculado", f"R$ {total_c:.2f}")
