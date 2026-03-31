@@ -4,8 +4,8 @@ import pandas as pd
 import re
 
 # --- 1. CONFIGURAÇÕES E CUSTOS ATUALIZADOS ---
-TOKEN = ''
-SHEET_ID = 
+SHEET_ID = st.secrets["smartsheet"]["sheet_id"]
+SMARTSHEET_ACCESS_TOKEN = st.secrets["smartsheet"]["access_token"]
 
 custo_setor_map = {
     "Almoxarifado": 0.0, "Apoio a Produção": 0.0, "Calandra": 30.08,
