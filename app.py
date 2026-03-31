@@ -4,8 +4,8 @@ import pandas as pd
 import re
 
 # --- 1. CONFIGURAÇÕES E CUSTOS ATUALIZADOS ---
-TOKEN = '32M5yHYGUMBRyOTkf3GstuBbJ36Q4T9TvefrX'
-SHEET_ID = 3432321207193476 
+TOKEN = ''
+SHEET_ID = 
 
 custo_setor_map = {
     "Almoxarifado": 0.0, "Apoio a Produção": 0.0, "Calandra": 30.08,
