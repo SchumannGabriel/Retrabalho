@@ -1,0 +1,34 @@
+Almoxarifado - R$ 0,0
+Apoio a Produção - R$ 0,0
+Calandra - R$ 30,08
+Comercial - R$ 0,0
+Descarregamento - R$ 0,0
+Escareação - R$ 40,04
+Engenharia de Produto  - R$ 0,0
+Frisadeira - R$ 57,03
+Furadeira de bancada - R$ 21,34
+Furadeira máquina - R$ 21,34
+Guilhotina - R$ 0,0
+Jato - R$ 76,40
+Laser - R$ 120,0
+Lixadeira (anel) - R$ 40,04
+Lixadeira (solda) - R$ 40,04
+Logística - R$ 0,0
+Manutenção - R$ 0,0
+Metrologia - R$ 0,0
+Matéria-prima - R$ 0,0
+Pintura - R$ 27,14
+Plasma - R$ 0,0
+Prensa - R$ 30,8
+PPCP - R$ 0,0
+Ponteação - R$ 21,34
+Recebimento - R$ 0,0
+Retifica - R$ 40,04
+Sistema de Gestão da Qualidade - R$ 0,0
+Solda Roda - R$ 59,15
+Solda Tartaruga - R$ 59,15
+Suspensão - R$ 27,14
+Teste de LP - R$ 11,91
+Torno Convencional - R$ 13,69
+Usinagem - R$ 50,23
+Rebarba - R$ 40,04
