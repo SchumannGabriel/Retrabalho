@@ -16,7 +16,7 @@ custo_setor_map = {
     "Laser": 120.0, "Lixadeira (anel)": 40.04, "Lixadeira (solda)": 40.04,
     "Logística": 0.0, "Manutenção": 0.0, "Metrologia": 0.0,
     "Matéria-prima": 0.0, "Pintura": 27.14, "Plasma": 0.0,
-    "Prensa": 30.8, "PPCP": 0.0, "Ponteação": 21.34,
+    "Prensa": 30.8, "PPCP": 11.91, "Ponteação": 21.34,
     "Recebimento": 0.0, "Retifica": 40.04, "Sistema de Gestão da Qualidade": 0.0,
     "Solda Roda": 59.15, "Solda Tartaruga": 59.15, "Suspensão": 27.14,
     "Teste de LP": 11.91, "Torno Convencional": 13.69, "Usinagem": 50.23,
